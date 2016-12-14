@@ -220,8 +220,8 @@ class FontProject:
     @timer()
     def save_otfs(
             self, ufos, ttf=False, is_instance=False, interpolatable=False,
-            mti_paths=None, use_afdko=False, autohint=None, subset=None,
-            use_production_names=None, subroutinize=False,
+            mti_paths=None, use_afdko=False, no_gpos=False, autohint=None,
+            subset=None, use_production_names=None, subroutinize=False,
             interpolate_layout_from=None, kern_writer_class=None,
             mark_writer_class=None):
         """Build OpenType binaries from UFOs.
@@ -235,6 +235,7 @@ class FontProject:
                 mapping layout table tags to MTI source paths which should be
                 compiled into those tables.
             use_afdko: If True, use AFDKO to compile feature source.
+            no_gpos: If True, don't write kern or mark features.
             autohint: Parameters to provide to ttfautohint. If not provided, the
                 autohinting step is skipped.
             subset: Whether to subset the output according to data in the UFOs.
@@ -245,19 +246,25 @@ class FontProject:
             interpolate_layout_from: A designspace path to give varLib for
                 interpolating layout tables to use in output.
             kern_writer_class: Class overriding ufo2ft's KernFeatureWriter.
+                Discarded if no_gpos is True.
             mark_writer_class: Class overriding ufo2ft's MarkFeatureWriter.
+                Discarded if no_gpos is True.
         """
 
         ext = 'ttf' if ttf else 'otf'
         fea_compiler = FDKFeatureCompiler if use_afdko else FeatureOTFCompiler
         otf_compiler = compileTTF if ttf else compileOTF
 
-        if kern_writer_class is None:
+        if no_gpos:
+            kern_writer_class = DummyFeatureWriter
+        elif kern_writer_class is None:
             kern_writer_class = KernFeatureWriter
         else:
             logger.info("Using %r", kern_writer_class.__module__)
 
-        if mark_writer_class is None:
+        if no_gpos:
+            mark_writer_class = DummyFeatureWriter
+        elif mark_writer_class is None:
             mark_writer_class = MarkFeatureWriter
         else:
             logger.info("Using %r", mark_writer_class.__module__)
@@ -534,6 +541,16 @@ class FontProject:
                 closest = path
                 closest_dist = cur_dist
         return closest
+
+
+class DummyFeatureWriter(object):
+    """A writer for blank features."""
+
+    def __init__(self, font, *args):
+        pass
+
+    def write(self, *args):
+        return ''
 
 
 class FDKFeatureCompiler(FeatureOTFCompiler):

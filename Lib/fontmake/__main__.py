@@ -111,6 +111,9 @@ def main(args=None):
         '--use-afdko', action='store_true',
         help='Use makeOTF instead of feaLib to compile FEA.')
     layoutGroup.add_argument(
+        '--no-gpos', action='store_true',
+        help="Don't write kern, mark, or mkmk features to the output GPOS.")
+    layoutGroup.add_argument(
         '--mti-source',
         help='Path to mtiLib .txt feature definitions (use instead of FEA)')
     layoutGroup.add_argument(
