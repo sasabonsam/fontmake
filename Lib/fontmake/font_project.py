@@ -182,21 +182,24 @@ class FontProject(object):
         """Build OpenType variable font from masters in a designspace."""
 
         # TODO: make output filename user configurable
-        outfile = os.path.splitext(os.path.basename(designspace_path))[0] + '-VF'
-        outfile = self._output_path(outfile, 'ttf', is_variable=True)
+        outfile = os.path.splitext(designspace_path)[0] + '-Variable.ttf'
+        #outfile = os.path.splitext(os.path.basename(designspace_path))[0] + '-VF'
+        #outfile = self._output_path(outfile, 'ttf', is_variable=True)
 
         logger.info('Building variable font ' + outfile)
 
-        master_locations, _ = self._designspace_locations(designspace_path)
-        ufo_paths = list(master_locations.keys())
-        ufodir = os.path.dirname(ufo_paths[0])
-        assert all(p.startswith(ufodir) for p in ufo_paths)
-        ttfdir = self._output_dir('ttf', interpolatable=True)
+        #master_locations, _ = self._designspace_locations(designspace_path)
+        #ufo_paths = list(master_locations.keys())
+        #ufodir = os.path.dirname(ufo_paths[0])
+        #assert all(p.startswith(ufodir) for p in ufo_paths)
+        #ttfdir = self._output_dir('ttf', interpolatable=True)
 
-        if ufodir:
-            finder = lambda s: s.replace(ufodir, ttfdir).replace('.ufo', '.ttf')
-        else:
-            finder = lambda s: os.path.join(ttfdir, s).replace('.ufo', '.ttf')
+        #if ufodir:
+        #    finder = lambda s: s.replace(ufodir, ttfdir).replace('.ufo', '.ttf')
+        #else:
+        #    finder = lambda s: os.path.join(ttfdir, s).replace('.ufo', '.ttf')
+
+        finder = lambda s: s.replace('.ufo', '.ttf')
         font, _, _ = varLib.build(designspace_path, finder)
 
         font.save(outfile)
@@ -516,17 +519,22 @@ class FontProject(object):
                      is_variable=False):
         """Generate output path for a font file with given extension."""
 
-        if isinstance(ufo_or_font_name, basestring):
-            font_name = ufo_or_font_name
-        else:
-            font_name = self._font_name(ufo_or_font_name)
+        #if isinstance(ufo_or_font_name, basestring):
+        #    font_name = ufo_or_font_name
+        #else:
+        #    font_name = self._font_name(ufo_or_font_name)
 
-        out_dir = self._output_dir(
-            ext, is_instance, interpolatable, autohinted, is_variable)
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
+        #out_dir = self._output_dir(
+        #    ext, is_instance, interpolatable, autohinted, is_variable)
+        #if not os.path.exists(out_dir):
+        #    os.makedirs(out_dir)
 
-        return os.path.join(out_dir, '%s.%s' % (font_name, ext))
+        #return os.path.join(out_dir, '%s.%s' % (font_name, ext))
+
+        folder_path, ufo_file_name = os.path.split(ufo_or_font_name.path)
+        ufo_file_name_no_ext, _ = os.path.splitext(ufo_file_name)
+
+        return os.path.join(folder_path, '%s.%s' % (ufo_file_name_no_ext, ext))
 
     def _designspace_locations(self, designspace_path):
         """Map font filenames to their locations in a designspace."""
